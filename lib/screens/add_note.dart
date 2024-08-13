@@ -57,6 +57,21 @@ class _AddNewNoteState extends State<AddNewNote> {
     Navigator.pop(context);
   }
 
+  void _handleMoreOption(String option) {
+    // Handle different options
+    switch (option) {
+      case 'Delete':
+        // Code to delete the note
+        break;
+      case 'Share':
+        // Code to share the note
+        break;
+      case 'Archive':
+        // Code to archive the note
+        break;
+    }
+  }
+
   @override
   void dispose() {
     _titleController.dispose();
@@ -73,13 +88,37 @@ class _AddNewNoteState extends State<AddNewNote> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(
-              right: 20,
-            ),
-            child: IconButton(
-              onPressed: _saveNote,
-              icon: const Icon(Icons.check),
+          IconButton(
+            onPressed: _saveNote,
+            icon: const Icon(Icons.check),
+          ),
+          PopupMenuButton<String>(
+            splashRadius: 100,
+            color: Colors.white,
+            surfaceTintColor: Colors.white,
+            icon: const Icon(Icons.more_vert),
+            onSelected: _handleMoreOption,
+            itemBuilder: (BuildContext context) =>
+                {'Delete', 'Share', 'Archive'}.map(
+              (String choice) {
+                return PopupMenuItem<String>(
+                  padding: const EdgeInsets.only(
+                    right: 40,
+                    left: 20,
+                  ),
+                  value: choice,
+                  child: Text(
+                    choice,
+                    style: const TextStyle(
+                      fontSize: 16,
+                    ),
+                  ),
+                );
+              },
+            ).toList(),
+            offset: const Offset(-20, 10),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
             ),
           ),
         ],
