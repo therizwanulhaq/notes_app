@@ -24,8 +24,8 @@ class CategoryContainer extends StatelessWidget {
       child: Text(
         category,
         style: const TextStyle(
-          color: Colors.black,
-        ),
+            // color: Colors.black,
+            ),
       ),
     );
   }
