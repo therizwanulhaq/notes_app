@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:notes_app/models/note.dart';
+import 'package:notes_app/providers/notes_provider.dart';
 
-class AddNewNote extends StatefulWidget {
+class AddNewNote extends ConsumerStatefulWidget {
   const AddNewNote({
     super.key,
-    required this.onAddNote,
     this.existingNote,
   });
 
-  final void Function(Note note) onAddNote;
   final Note? existingNote;
 
   @override
-  State<AddNewNote> createState() => _AddNewNoteState();
+  ConsumerState<AddNewNote> createState() => _AddNewNoteState();
 }
 
-class _AddNewNoteState extends State<AddNewNote> {
+class _AddNewNoteState extends ConsumerState<AddNewNote> {
   late TextEditingController _titleController;
   late TextEditingController _contentController;
   int _charCount = 0;
@@ -53,7 +53,11 @@ class _AddNewNoteState extends State<AddNewNote> {
           'Uncategorized', // Retain existing category if editing
     );
 
-    widget.onAddNote(note);
+    if (widget.existingNote != null) {
+      ref.read(notesProvider.notifier).updateNote(note);
+    } else {
+      ref.read(notesProvider.notifier).addNote(note);
+    }
     Navigator.pop(context);
   }
 
@@ -61,7 +65,41 @@ class _AddNewNoteState extends State<AddNewNote> {
     // Handle different options
     switch (option) {
       case 'Delete':
-        // Code to delete the note
+        // Show confirmation dialog before deletion
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Delete Note?'),
+            content: const Text('Are you sure you want to delete this note?'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context); // Close the dialog
+                },
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () {
+                  ref
+                      .read(notesProvider.notifier)
+                      .deleteNote(widget.existingNote!.id);
+
+                  // Show a SnackBar after deleting the note
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Note deleted'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                  Navigator.pop(context); // Close the dialog
+                  Navigator.pop(context); // Close the AddNewNote screen
+                },
+                child: const Text('Delete'),
+              ),
+            ],
+          ),
+        );
+
         break;
       case 'Share':
         // Code to share the note
