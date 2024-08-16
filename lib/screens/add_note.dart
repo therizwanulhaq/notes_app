@@ -132,8 +132,7 @@ class _AddNewNoteState extends ConsumerState<AddNewNote> {
           ),
           PopupMenuButton<String>(
             splashRadius: 100,
-            color: Colors.white,
-            surfaceTintColor: Colors.white,
+            color: Theme.of(context).colorScheme.background,
             icon: const Icon(Icons.more_vert),
             onSelected: _handleMoreOption,
             itemBuilder: (BuildContext context) =>
