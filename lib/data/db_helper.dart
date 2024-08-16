@@ -1,3 +1,4 @@
+import 'package:notes_app/data/notes.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:notes_app/models/note.dart';
@@ -22,6 +23,15 @@ class DBHelper {
           await db.execute(
             'CREATE TABLE $_tableName(id TEXT PRIMARY KEY, title TEXT, content TEXT, date TEXT, category TEXT)',
           );
+
+          // Insert default notes during database creation
+          for (var note in defaultNotes) {
+            await db.insert(
+              _tableName,
+              note.toMap(),
+              conflictAlgorithm: ConflictAlgorithm.replace,
+            );
+          }
         },
       );
     } catch (e) {
