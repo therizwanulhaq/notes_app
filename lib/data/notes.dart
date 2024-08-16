@@ -1,30 +1,22 @@
 import 'package:notes_app/models/note.dart';
 
-final notes = [
+final List<Note> defaultNotes = [
   Note(
-    title: "first note",
-    content: "content of the note which can be big",
+    title: 'Welcome to Notes App',
+    content: 'This is your first note. Feel free to edit or delete it.',
     date: DateTime.now(),
+    category: 'General',
   ),
   Note(
-    title: "second note",
-    content:
-        "content of the note which can be big yeah and ig this one is the one which might give me headache yeah this is it ig we'll see now how it will work out alright",
+    title: 'Quick Tip',
+    content: 'Swipe right to delete a note.',
     date: DateTime.now(),
+    category: 'Tips',
   ),
   Note(
-    title: "third note",
-    content: "content of the note which can be big",
+    title: 'Another Note',
+    content: 'Add your thoughts here!',
     date: DateTime.now(),
-  ),
-  Note(
-    title: "fourth note",
-    content: "content of the note which can be big",
-    date: DateTime.now(),
-  ),
-  Note(
-    title: "fifth note",
-    content: "content of the note which can be big",
-    date: DateTime.now(),
+    category: 'Personal',
   ),
 ];
