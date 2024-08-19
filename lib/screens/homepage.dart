@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:intl/intl.dart';
+import 'package:notes_app/providers/categories_provider.dart';
 import 'package:notes_app/screens/add_note.dart';
+import 'package:notes_app/screens/categories.dart';
 import 'package:notes_app/widgets/category_container.dart';
 import 'package:notes_app/widgets/note_container.dart';
-import 'package:notes_app/providers/notes_provider.dart'; // Assuming this is the file where you declared the provider
+import 'package:notes_app/providers/notes_provider.dart';
 
 class MyHomePage extends ConsumerWidget {
   const MyHomePage({super.key});
@@ -13,14 +15,7 @@ class MyHomePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final notes = ref.watch(notesProvider);
-
-    final List<String> categories = [
-      "All",
-      "Work",
-      "Personal",
-      "Study",
-      "Uncategorized",
-    ];
+    final categories = ref.watch(categoriesProvider);
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
@@ -57,35 +52,45 @@ class MyHomePage extends ConsumerWidget {
                               itemCount: categories.length,
                               itemBuilder: (context, index) {
                                 final category = categories[index];
+                                final categoryName = category.category;
                                 return CategoryContainer(
-                                  category: category,
+                                  category: categoryName,
                                 );
                               },
                             ),
                           ),
                         ),
                         const SizedBox(width: 10),
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Colors.grey,
-                                offset: Offset(0.0, 1.0),
-                                blurRadius: 5.0,
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const Categories(),
+                                ));
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(10),
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Colors.grey,
+                                  offset: Offset(0.0, 1.0),
+                                  blurRadius: 5.0,
+                                ),
+                              ],
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .secondaryContainer,
+                              borderRadius: BorderRadius.circular(
+                                10,
                               ),
-                            ],
-                            color: Theme.of(context)
-                                .colorScheme
-                                .secondaryContainer,
-                            borderRadius: BorderRadius.circular(
-                              10,
                             ),
-                          ),
-                          child: Icon(
-                            Icons.folder_outlined,
-                            color: Colors.amber[700],
+                            child: Icon(
+                              Icons.folder_outlined,
+                              color: Colors.amber[700],
+                            ),
                           ),
                         )
                       ],
