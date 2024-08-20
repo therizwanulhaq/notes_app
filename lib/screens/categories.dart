@@ -7,18 +7,22 @@ import 'package:notes_app/models/category.dart';
 import 'package:notes_app/models/note.dart';
 import 'package:notes_app/providers/categories_provider.dart';
 import 'package:notes_app/providers/notes_provider.dart';
+import 'package:notes_app/providers/selected_category.dart';
 
 class CategoriesScreen extends ConsumerWidget {
   const CategoriesScreen({
     super.key,
     this.existingNote,
+    this.selectedCategory,
   });
 
   final Note? existingNote;
+  final String? selectedCategory;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final categories = ref.watch(categoriesProvider);
+
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
@@ -65,18 +69,46 @@ class CategoriesScreen extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: ListTile(
-                  leading: const Icon(Icons.check),
-                  title: Text(category.category),
-                  trailing: const Text("23"),
+                  selectedColor: Colors.black,
+                  selected: _isSelected(category.category),
+                  leading: Icon(
+                    Icons.check,
+                    color: _isSelected(category.category)
+                        ? Colors.amber
+                        : Colors.transparent,
+                  ),
+                  title: Text(
+                    category.category,
+                    style: TextStyle(
+                      fontWeight: _isSelected(category.category)
+                          ? FontWeight.w500
+                          : FontWeight.normal,
+                    ),
+                  ),
+                  trailing: Text('${_getNoteCount(category.category, ref)}'),
                   onTap: () => _moveNoteToCategory(ref, context, category),
                 ),
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
           ],
         ],
       ),
     );
+  }
+
+  bool _isSelected(String categoryName) {
+    return selectedCategory == categoryName ||
+        existingNote?.category == categoryName;
+  }
+
+  int _getNoteCount(String categoryName, WidgetRef ref) {
+    final notes = ref.read(notesProvider);
+    if (categoryName == 'All') {
+      return notes.length;
+    } else {
+      return notes.where((note) => note.category == categoryName).length;
+    }
   }
 
   void _moveNoteToCategory(
@@ -92,6 +124,11 @@ class CategoriesScreen extends ConsumerWidget {
 
       // Navigate back after updating
       Navigator.pop(context);
+      Navigator.pop(context);
+    } else {
+      ref
+          .read(selectedCategoryProvider.notifier)
+          .selectCategory(category.category);
       Navigator.pop(context);
     }
   }

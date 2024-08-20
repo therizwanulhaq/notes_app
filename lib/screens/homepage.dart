@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:intl/intl.dart';
+import 'package:notes_app/models/category.dart';
 import 'package:notes_app/models/note.dart';
 import 'package:notes_app/providers/categories_provider.dart';
+import 'package:notes_app/providers/selected_category.dart';
 import 'package:notes_app/screens/add_note.dart';
 import 'package:notes_app/screens/categories.dart';
 import 'package:notes_app/widgets/category_container.dart';
@@ -18,7 +20,19 @@ class MyHomePage extends ConsumerStatefulWidget {
 }
 
 class _MyHomePageState extends ConsumerState<MyHomePage> {
-  var selectedCategory = 'All';
+  late final ScrollController _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,10 +40,15 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
         MediaQuery.of(context).platformBrightness == Brightness.dark;
     final notes = ref.watch(notesProvider);
     final categories = ref.watch(categoriesProvider);
+    final selectedCategory = ref.watch(selectedCategoryProvider);
 
     final List<Note> filteredNotes = selectedCategory == 'All'
         ? notes
         : notes.where((note) => note.category == selectedCategory).toList();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToSelectedCategory(selectedCategory, categories);
+    });
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
@@ -64,6 +83,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                       borderRadius: BorderRadius.circular(10),
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
+                        controller: _scrollController,
                         itemCount: categories.length,
                         itemBuilder: (context, index) {
                           final category = categories[index];
@@ -72,9 +92,10 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                               selectedCategory == categoryName;
                           return GestureDetector(
                             onTap: () {
-                              setState(() {
-                                selectedCategory = category.category;
-                              });
+                              ref
+                                  .read(selectedCategoryProvider.notifier)
+                                  .selectCategory(
+                                      isSelected ? 'All' : categoryName);
                             },
                             child: CategoryContainer(
                                 category: categoryName, isSelected: isSelected),
@@ -89,7 +110,9 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const CategoriesScreen(),
+                            builder: (context) => CategoriesScreen(
+                              selectedCategory: selectedCategory,
+                            ),
                           ));
                     },
                     child: Container(
@@ -182,5 +205,24 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
         ),
       ),
     );
+  }
+
+  void _scrollToSelectedCategory(
+      String selectedCategory, List<Category> categories) {
+    final index = categories
+        .indexWhere((category) => category.category == selectedCategory);
+    if (index != -1) {
+      // Calculate the scroll offset
+      const itemWidth = 50.0;
+      const itemSpacing = 6.0;
+      final offset = (itemWidth + itemSpacing) * index;
+
+      // Scroll to the calculated offset with a smooth animation
+      _scrollController.animateTo(
+        offset,
+        duration: const Duration(milliseconds: 900),
+        curve: Curves.easeInOut,
+      );
+    }
   }
 }
