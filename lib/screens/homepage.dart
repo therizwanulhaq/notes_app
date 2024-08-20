@@ -21,6 +21,7 @@ class MyHomePage extends ConsumerStatefulWidget {
 
 class _MyHomePageState extends ConsumerState<MyHomePage> {
   late final ScrollController _scrollController;
+  bool _shouldAnimateScroll = true;
 
   @override
   void initState() {
@@ -47,7 +48,10 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
         : notes.where((note) => note.category == selectedCategory).toList();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollToSelectedCategory(selectedCategory, categories);
+      if (_shouldAnimateScroll) {
+        _scrollToSelectedCategory(selectedCategory, categories);
+      }
+      _shouldAnimateScroll = true;
     });
 
     return Scaffold(
@@ -61,7 +65,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
             child: IconButton(
               onPressed: () {},
               icon: const Icon(
-                Icons.settings,
+                Icons.settings_outlined,
               ),
             ),
           ),
@@ -92,13 +96,16 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                               selectedCategory == categoryName;
                           return GestureDetector(
                             onTap: () {
+                              _shouldAnimateScroll = false;
                               ref
                                   .read(selectedCategoryProvider.notifier)
                                   .selectCategory(
                                       isSelected ? 'All' : categoryName);
                             },
                             child: CategoryContainer(
-                                category: categoryName, isSelected: isSelected),
+                              category: categoryName,
+                              isSelected: isSelected,
+                            ),
                           );
                         },
                       ),
@@ -135,7 +142,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                       ),
                       child: Icon(
                         Icons.folder_outlined,
-                        color: Colors.amber[700],
+                        color: Colors.amber[800],
                       ),
                     ),
                   )
@@ -191,7 +198,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
         ),
         child: FloatingActionButton(
           foregroundColor: Colors.white,
-          backgroundColor: const Color.fromARGB(181, 255, 162, 0),
+          backgroundColor: Colors.amber[800],
           onPressed: () {
             Navigator.push(
               context,
@@ -201,7 +208,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
             );
           },
           tooltip: 'Add Note',
-          child: const Icon(Icons.add),
+          child: const Icon(Icons.add_task),
         ),
       ),
     );
@@ -214,7 +221,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
     if (index != -1) {
       // Calculate the scroll offset
       const itemWidth = 50.0;
-      const itemSpacing = 6.0;
+      const itemSpacing = 10.0;
       final offset = (itemWidth + itemSpacing) * index;
 
       // Scroll to the calculated offset with a smooth animation

@@ -35,7 +35,7 @@ class CategoriesScreen extends ConsumerWidget {
               _showNewFolderDialog(context, ref);
             },
             icon: const Icon(
-              Icons.add,
+              Icons.add_circle_outline,
             ),
           ),
         ],
@@ -65,11 +65,11 @@ class CategoriesScreen extends ConsumerWidget {
               ),
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.secondaryContainer,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: ListTile(
-                  selectedColor: Colors.black,
+                  selectedColor: Theme.of(context).colorScheme.onPrimary,
                   selected: _isSelected(category.category),
                   leading: Icon(
                     Icons.check,
@@ -126,9 +126,8 @@ class CategoriesScreen extends ConsumerWidget {
       Navigator.pop(context);
       Navigator.pop(context);
     } else {
-      ref
-          .read(selectedCategoryProvider.notifier)
-          .selectCategory(category.category);
+      ref.read(selectedCategoryProvider.notifier).selectCategory(
+          selectedCategory == category.category ? 'All' : category.category);
       Navigator.pop(context);
     }
   }
