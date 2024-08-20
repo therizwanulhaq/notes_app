@@ -5,9 +5,11 @@ class CategoryContainer extends StatelessWidget {
   const CategoryContainer({
     super.key,
     required this.category,
+    required this.isSelected,
   });
 
   final String category;
+  final bool isSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -23,9 +25,10 @@ class CategoryContainer extends StatelessWidget {
       ),
       child: Text(
         category,
-        style: const TextStyle(
-            // color: Colors.black,
-            ),
+        style: TextStyle(
+          fontWeight: FontWeight.w500,
+          color: isSelected ? Colors.black : Colors.grey,
+        ),
       ),
     );
   }

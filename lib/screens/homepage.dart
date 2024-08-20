@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:intl/intl.dart';
+import 'package:notes_app/models/note.dart';
 import 'package:notes_app/providers/categories_provider.dart';
 import 'package:notes_app/screens/add_note.dart';
 import 'package:notes_app/screens/categories.dart';
@@ -9,13 +10,24 @@ import 'package:notes_app/widgets/category_container.dart';
 import 'package:notes_app/widgets/note_container.dart';
 import 'package:notes_app/providers/notes_provider.dart';
 
-class MyHomePage extends ConsumerWidget {
+class MyHomePage extends ConsumerStatefulWidget {
   const MyHomePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends ConsumerState<MyHomePage> {
+  var selectedCategory = 'All';
+
+  @override
+  Widget build(BuildContext context) {
     final notes = ref.watch(notesProvider);
     final categories = ref.watch(categoriesProvider);
+
+    final List<Note> filteredNotes = selectedCategory == 'All'
+        ? notes
+        : notes.where((note) => note.category == selectedCategory).toList();
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
@@ -53,8 +65,17 @@ class MyHomePage extends ConsumerWidget {
                               itemBuilder: (context, index) {
                                 final category = categories[index];
                                 final categoryName = category.category;
-                                return CategoryContainer(
-                                  category: categoryName,
+                                final bool isSelected =
+                                    selectedCategory == categoryName;
+                                return GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      selectedCategory = category.category;
+                                    });
+                                  },
+                                  child: CategoryContainer(
+                                      category: categoryName,
+                                      isSelected: isSelected),
                                 );
                               },
                             ),
@@ -102,13 +123,13 @@ class MyHomePage extends ConsumerWidget {
                     child: MasonryGridView.builder(
                       crossAxisSpacing: 10,
                       mainAxisSpacing: 10,
-                      itemCount: notes.length,
+                      itemCount: filteredNotes.length,
                       gridDelegate:
                           const SliverSimpleGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
                       ),
                       itemBuilder: (context, index) {
-                        final note = notes[index];
+                        final note = filteredNotes[index];
                         final title = note.title;
                         final content = note.content;
                         final formattedDate =
