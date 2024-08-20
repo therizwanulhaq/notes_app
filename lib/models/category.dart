@@ -6,7 +6,7 @@ class Category {
   Category({
     String? id,
     required this.category,
-  }) : id = uuid.v4();
+  }) : id = id ?? uuid.v4();
   final String id;
   final String category;
 

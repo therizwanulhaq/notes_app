@@ -1,11 +1,20 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:notes_app/models/category.dart';
-import 'package:notes_app/providers/categories_provider.dart';
 
-class Categories extends ConsumerWidget {
-  const Categories({super.key});
+import 'package:notes_app/models/category.dart';
+import 'package:notes_app/models/note.dart';
+import 'package:notes_app/providers/categories_provider.dart';
+import 'package:notes_app/providers/notes_provider.dart';
+
+class CategoriesScreen extends ConsumerWidget {
+  const CategoriesScreen({
+    super.key,
+    this.existingNote,
+  });
+
+  final Note? existingNote;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -59,6 +68,7 @@ class Categories extends ConsumerWidget {
                   leading: const Icon(Icons.check),
                   title: Text(category.category),
                   trailing: const Text("23"),
+                  onTap: () => _moveNoteToCategory(ref, context, category),
                 ),
               ),
             ),
@@ -67,6 +77,23 @@ class Categories extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  void _moveNoteToCategory(
+      WidgetRef ref, BuildContext context, Category category) {
+    if (existingNote?.id != null) {
+      // Update the note with the selected category
+      final notesNotifier = ref.read(notesProvider.notifier);
+      final note = ref
+          .read(notesProvider)
+          .firstWhere((note) => note.id == existingNote?.id);
+      note.setCategory(category.category);
+      notesNotifier.updateNote(note);
+
+      // Navigate back after updating
+      Navigator.pop(context);
+      Navigator.pop(context);
+    }
   }
 
   void _showNewFolderDialog(BuildContext context, WidgetRef ref) {

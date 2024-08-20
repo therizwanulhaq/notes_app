@@ -93,9 +93,7 @@ class DBHelper {
 
     return List.generate(
       maps.length,
-      (index) => Category.fromMap(
-        maps[index],
-      ),
+      (index) => Category.fromMap(maps[index]),
     );
   }
 

@@ -66,7 +66,8 @@ class MyHomePage extends ConsumerWidget {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const Categories(),
+                                  builder: (context) =>
+                                      const CategoriesScreen(),
                                 ));
                           },
                           child: Container(
