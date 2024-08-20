@@ -22,6 +22,8 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode =
+        MediaQuery.of(context).platformBrightness == Brightness.dark;
     final notes = ref.watch(notesProvider);
     final categories = ref.watch(categoriesProvider);
 
@@ -35,92 +37,93 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.background,
         title: const Icon(Icons.ac_unit_sharp),
         actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(
-              Icons.settings,
+          Padding(
+            padding: const EdgeInsets.only(right: 5),
+            child: IconButton(
+              onPressed: () {},
+              icon: const Icon(
+                Icons.settings,
+              ),
             ),
           ),
         ],
       ),
-      body: notes.isEmpty
-          ? const Center(child: Text("Empty"))
-          : Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 8,
-              ),
-              child: Column(
+      body: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 15,
+          vertical: 8,
+        ),
+        child: Column(
+          children: [
+            SizedBox(
+              height: 40,
+              child: Row(
                 children: [
-                  SizedBox(
-                    height: 50,
-                    child: Row(
-                      children: [
-                        Flexible(
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: categories.length,
-                              itemBuilder: (context, index) {
-                                final category = categories[index];
-                                final categoryName = category.category;
-                                final bool isSelected =
-                                    selectedCategory == categoryName;
-                                return GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      selectedCategory = category.category;
-                                    });
-                                  },
-                                  child: CategoryContainer(
-                                      category: categoryName,
-                                      isSelected: isSelected),
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const CategoriesScreen(),
-                                ));
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.all(10),
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              boxShadow: const [
-                                BoxShadow(
+                  Flexible(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: categories.length,
+                        itemBuilder: (context, index) {
+                          final category = categories[index];
+                          final categoryName = category.category;
+                          final bool isSelected =
+                              selectedCategory == categoryName;
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                selectedCategory = category.category;
+                              });
+                            },
+                            child: CategoryContainer(
+                                category: categoryName, isSelected: isSelected),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const CategoriesScreen(),
+                          ));
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        boxShadow: isDarkMode
+                            ? []
+                            : [
+                                const BoxShadow(
                                   color: Colors.grey,
                                   offset: Offset(0.0, 1.0),
                                   blurRadius: 5.0,
                                 ),
                               ],
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .secondaryContainer,
-                              borderRadius: BorderRadius.circular(
-                                10,
-                              ),
-                            ),
-                            child: Icon(
-                              Icons.folder_outlined,
-                              color: Colors.amber[700],
-                            ),
-                          ),
-                        )
-                      ],
+                        color: Theme.of(context).colorScheme.secondaryContainer,
+                        borderRadius: BorderRadius.circular(
+                          10,
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.folder_outlined,
+                        color: Colors.amber[700],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  Expanded(
-                    child: MasonryGridView.builder(
+                  )
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+            Expanded(
+              child: notes.isEmpty
+                  ? const Center(child: Text("Empty"))
+                  : MasonryGridView.builder(
                       crossAxisSpacing: 10,
                       mainAxisSpacing: 10,
                       itemCount: filteredNotes.length,
@@ -154,10 +157,10 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                         );
                       },
                     ),
-                  ),
-                ],
-              ),
             ),
+          ],
+        ),
+      ),
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(
           bottom: 30,

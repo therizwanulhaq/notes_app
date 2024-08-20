@@ -95,12 +95,18 @@ class _AddNewNoteState extends ConsumerState<AddNewNote> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode =
+        MediaQuery.of(context).platformBrightness == Brightness.dark;
     final formattedDate = DateFormat('MMMM d  h:mm a').format(_date);
 
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: isDarkMode
+          ? Colors.black
+          : Theme.of(context).colorScheme.secondaryContainer,
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.background,
+        backgroundColor: isDarkMode
+            ? Colors.black
+            : Theme.of(context).colorScheme.secondaryContainer,
         actions: [
           IconButton(
             onPressed: _saveNote,

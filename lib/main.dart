@@ -17,13 +17,20 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(
           brightness: Brightness.dark,
           seedColor: Colors.black,
+          background: Colors.black,
+          secondaryContainer: const Color.fromARGB(255, 32, 32, 32),
+          onPrimary: Colors.white,
+          onSecondary: Colors.grey,
         ),
       ),
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.white,
-            background: const Color.fromARGB(255, 238, 238, 238),
-            secondaryContainer: Colors.white),
+          seedColor: Colors.white,
+          background: const Color.fromARGB(255, 238, 238, 238),
+          secondaryContainer: Colors.white,
+          onPrimary: Colors.black,
+          onSecondary: Colors.grey,
+        ),
         useMaterial3: true,
       ),
       home: const MyHomePage(),

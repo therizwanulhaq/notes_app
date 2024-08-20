@@ -14,11 +14,13 @@ class CategoryContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(right: 5),
-      padding: const EdgeInsets.all(10),
+      margin: const EdgeInsets.only(right: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 15),
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.secondaryContainer,
+        color: isSelected
+            ? Theme.of(context).colorScheme.secondary.withAlpha(27)
+            : Theme.of(context).colorScheme.secondaryContainer,
         borderRadius: BorderRadius.circular(
           10,
         ),
@@ -26,8 +28,11 @@ class CategoryContainer extends StatelessWidget {
       child: Text(
         category,
         style: TextStyle(
+          fontSize: 13,
           fontWeight: FontWeight.w500,
-          color: isSelected ? Colors.black : Colors.grey,
+          color: isSelected
+              ? Theme.of(context).colorScheme.onPrimary
+              : Theme.of(context).colorScheme.onSecondary,
         ),
       ),
     );
