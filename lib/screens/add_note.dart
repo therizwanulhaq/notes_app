@@ -22,6 +22,7 @@ class _AddNewNoteState extends ConsumerState<AddNewNote> {
   late TextEditingController _contentController;
   int _charCount = 0;
   late DateTime _date;
+  bool _isSaved = false;
 
   @override
   void initState() {
@@ -44,6 +45,7 @@ class _AddNewNoteState extends ConsumerState<AddNewNote> {
   }
 
   void _saveNote() {
+    FocusScope.of(context).unfocus();
     if (_titleController.text.isNotEmpty ||
         _contentController.text.isNotEmpty) {
       final note = Note(
@@ -62,6 +64,9 @@ class _AddNewNoteState extends ConsumerState<AddNewNote> {
         ref.read(notesProvider.notifier).addNote(note);
       }
     }
+    setState(() {
+      _isSaved = true;
+    });
   }
 
   void _handleMoreOption(String option) {
@@ -121,45 +126,54 @@ class _AddNewNoteState extends ConsumerState<AddNewNote> {
               ? Colors.black
               : Theme.of(context).colorScheme.secondaryContainer,
           actions: [
-            IconButton(
-              onPressed: _saveNote,
-              icon: Icon(
-                Icons.check,
-                color: Theme.of(context).colorScheme.onPrimary,
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              transitionBuilder: (child, animation) {
+                return ScaleTransition(scale: animation, child: child);
+              },
+              child: IconButton(
+                key: ValueKey<bool>(_isSaved), // Key to differentiate the icons
+                onPressed: _saveNote,
+                icon: Icon(
+                  _isSaved ? Icons.done_all : Icons.done,
+                  color: Theme.of(context).colorScheme.onPrimary,
+                ),
               ),
             ),
-            PopupMenuButton<String>(
-              splashRadius: 100,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              surfaceTintColor: Theme.of(context).colorScheme.onSurfaceVariant,
-              icon: Icon(
-                Icons.more_vert,
-                color: Theme.of(context).colorScheme.onPrimary,
-              ),
-              onSelected: _handleMoreOption,
-              itemBuilder: (BuildContext context) =>
-                  {'Share', 'Archive', 'Move to', 'Delete'}.map(
-                (String choice) {
-                  return PopupMenuItem<String>(
-                    padding: const EdgeInsets.only(
-                      right: 40,
-                      left: 20,
-                    ),
-                    value: choice,
-                    child: Text(
-                      choice,
-                      style: const TextStyle(
-                        fontSize: 16,
+            if (widget.existingNote != null || _isSaved)
+              PopupMenuButton<String>(
+                splashRadius: 100,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                surfaceTintColor:
+                    Theme.of(context).colorScheme.onSurfaceVariant,
+                icon: Icon(
+                  Icons.more_vert,
+                  color: Theme.of(context).colorScheme.onPrimary,
+                ),
+                onSelected: _handleMoreOption,
+                itemBuilder: (BuildContext context) =>
+                    {'Share', 'Archive', 'Move to', 'Delete'}.map(
+                  (String choice) {
+                    return PopupMenuItem<String>(
+                      padding: const EdgeInsets.only(
+                        right: 40,
+                        left: 20,
                       ),
-                    ),
-                  );
-                },
-              ).toList(),
-              offset: const Offset(-20, 10),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
+                      value: choice,
+                      child: Text(
+                        choice,
+                        style: const TextStyle(
+                          fontSize: 16,
+                        ),
+                      ),
+                    );
+                  },
+                ).toList(),
+                offset: const Offset(-20, 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
               ),
-            ),
           ],
         ),
         body: SingleChildScrollView(
