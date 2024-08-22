@@ -108,6 +108,8 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
           ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 20),
+              surfaceTintColor:
+                  Theme.of(context).colorScheme.secondaryContainer,
               backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
               foregroundColor: Theme.of(context).colorScheme.onPrimary,
               shape: RoundedRectangleBorder(

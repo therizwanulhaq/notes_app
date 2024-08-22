@@ -44,22 +44,24 @@ class _AddNewNoteState extends ConsumerState<AddNewNote> {
   }
 
   void _saveNote() {
-    final note = Note(
-      id: widget.existingNote
-          ?.id, // Use existing id if editing, otherwise it will generate a new one
-      title: _titleController.text,
-      content: _contentController.text,
-      date: _date,
-      category: widget.existingNote?.category ??
-          'Uncategorized', // Retain existing category if editing
-    );
+    if (_titleController.text.isNotEmpty ||
+        _contentController.text.isNotEmpty) {
+      final note = Note(
+        id: widget.existingNote
+            ?.id, // Use existing id if editing, otherwise it will generate a new one
+        title: _titleController.text,
+        content: _contentController.text,
+        date: _date,
+        category: widget.existingNote?.category ??
+            'Uncategorized', // Retain existing category if editing
+      );
 
-    if (widget.existingNote != null) {
-      ref.read(notesProvider.notifier).updateNote(note);
-    } else {
-      ref.read(notesProvider.notifier).addNote(note);
+      if (widget.existingNote != null) {
+        ref.read(notesProvider.notifier).updateNote(note);
+      } else {
+        ref.read(notesProvider.notifier).addNote(note);
+      }
     }
-    Navigator.pop(context);
   }
 
   void _handleMoreOption(String option) {
@@ -99,110 +101,133 @@ class _AddNewNoteState extends ConsumerState<AddNewNote> {
         MediaQuery.of(context).platformBrightness == Brightness.dark;
     final formattedDate = DateFormat('MMMM d  h:mm a').format(_date);
 
-    return Scaffold(
-      backgroundColor: isDarkMode
-          ? Colors.black
-          : Theme.of(context).colorScheme.secondaryContainer,
-      appBar: AppBar(
+    return PopScope(
+      onPopInvoked: (didPop) {
+        _saveNote();
+      },
+      child: Scaffold(
         backgroundColor: isDarkMode
             ? Colors.black
             : Theme.of(context).colorScheme.secondaryContainer,
-        actions: [
-          IconButton(
-            onPressed: _saveNote,
-            icon: const Icon(Icons.check),
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.maybePop(context);
+            },
           ),
-          PopupMenuButton<String>(
-            splashRadius: 100,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-            surfaceTintColor: Theme.of(context).colorScheme.onSurfaceVariant,
-            icon: const Icon(Icons.more_vert),
-            onSelected: _handleMoreOption,
-            itemBuilder: (BuildContext context) =>
-                {'Share', 'Archive', 'Move to', 'Delete'}.map(
-              (String choice) {
-                return PopupMenuItem<String>(
-                  padding: const EdgeInsets.only(
-                    right: 40,
-                    left: 20,
-                  ),
-                  value: choice,
-                  child: Text(
-                    choice,
-                    style: const TextStyle(
-                      fontSize: 16,
-                    ),
-                  ),
-                );
-              },
-            ).toList(),
-            offset: const Offset(-20, 10),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
+          scrolledUnderElevation: 0.0,
+          backgroundColor: isDarkMode
+              ? Colors.black
+              : Theme.of(context).colorScheme.secondaryContainer,
+          actions: [
+            IconButton(
+              onPressed: _saveNote,
+              icon: Icon(
+                Icons.check,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
             ),
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 20,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextField(
-                textCapitalization: TextCapitalization.sentences,
-                controller: _titleController,
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  hintText: "Title",
-                  hintStyle: TextStyle(
-                      color: Theme.of(context).colorScheme.onPrimary,
-                      fontSize: 25,
-                      fontWeight: FontWeight.w400),
-                ),
-                style: const TextStyle(
-                  fontSize: 25,
-                  fontWeight: FontWeight.w400,
-                ),
+            PopupMenuButton<String>(
+              splashRadius: 100,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              surfaceTintColor: Theme.of(context).colorScheme.onSurfaceVariant,
+              icon: Icon(
+                Icons.more_vert,
+                color: Theme.of(context).colorScheme.onPrimary,
               ),
-              Row(
-                children: [
-                  Text(
-                    formattedDate,
-                    style: const TextStyle(
+              onSelected: _handleMoreOption,
+              itemBuilder: (BuildContext context) =>
+                  {'Share', 'Archive', 'Move to', 'Delete'}.map(
+                (String choice) {
+                  return PopupMenuItem<String>(
+                    padding: const EdgeInsets.only(
+                      right: 40,
+                      left: 20,
+                    ),
+                    value: choice,
+                    child: Text(
+                      choice,
+                      style: const TextStyle(
+                        fontSize: 16,
+                      ),
+                    ),
+                  );
+                },
+              ).toList(),
+              offset: const Offset(-20, 10),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+              ),
+            ),
+          ],
+        ),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 20,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextField(
+                  textCapitalization: TextCapitalization.sentences,
+                  controller: _titleController,
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    hintText: "Title",
+                    hintStyle: TextStyle(
                       color: Colors.grey,
+                      fontSize: 25,
+                      fontWeight: FontWeight.w400,
                     ),
                   ),
-                  Text(
-                    "  |  $_charCount characters",
-                    style: const TextStyle(
-                      color: Colors.grey,
-                    ),
-                  )
-                ],
-              ),
-              const SizedBox(height: 10),
-              if (widget.existingNote != null)
-                Text(widget.existingNote!.category),
-              const SizedBox(height: 10),
-              TextField(
-                controller: _contentController,
-                decoration: const InputDecoration(
-                  border: InputBorder.none,
-                  hintText: "Start typing...",
-                  hintStyle: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 20,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                    fontSize: 25,
                     fontWeight: FontWeight.w400,
                   ),
                 ),
-                maxLines: null,
-                expands: false,
-                textInputAction: TextInputAction.newline,
-              )
-            ],
+                Row(
+                  children: [
+                    Text(
+                      formattedDate,
+                      style: const TextStyle(
+                        color: Colors.grey,
+                      ),
+                    ),
+                    Text(
+                      "  |  $_charCount characters",
+                      style: const TextStyle(
+                        color: Colors.grey,
+                      ),
+                    )
+                  ],
+                ),
+                const SizedBox(height: 10),
+                if (widget.existingNote != null)
+                  Text(widget.existingNote!.category),
+                const SizedBox(height: 10),
+                TextField(
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  ),
+                  controller: _contentController,
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    hintText: "Start typing...",
+                    hintStyle: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  maxLines: null,
+                  expands: false,
+                  textInputAction: TextInputAction.newline,
+                )
+              ],
+            ),
           ),
         ),
       ),

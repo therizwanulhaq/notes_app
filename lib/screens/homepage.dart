@@ -57,6 +57,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
+        scrolledUnderElevation: 0.0,
         backgroundColor: Theme.of(context).colorScheme.background,
         title: const Icon(Icons.ac_unit_sharp),
         actions: [
