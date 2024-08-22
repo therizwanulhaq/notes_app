@@ -5,6 +5,15 @@ final List<Category> defaultCategories = [
     category: 'All',
   ),
   Category(
+    category: 'Instructions',
+  ),
+  Category(
+    category: 'Features',
+  ),
+  Category(
+    category: 'Stores',
+  ),
+  Category(
     category: 'Uncategorized',
   ),
 ];

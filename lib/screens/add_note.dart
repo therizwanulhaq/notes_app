@@ -114,7 +114,8 @@ class _AddNewNoteState extends ConsumerState<AddNewNote> {
           ),
           PopupMenuButton<String>(
             splashRadius: 100,
-            color: Theme.of(context).colorScheme.background,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            surfaceTintColor: Theme.of(context).colorScheme.onSurfaceVariant,
             icon: const Icon(Icons.more_vert),
             onSelected: _handleMoreOption,
             itemBuilder: (BuildContext context) =>
@@ -153,11 +154,11 @@ class _AddNewNoteState extends ConsumerState<AddNewNote> {
               TextField(
                 textCapitalization: TextCapitalization.sentences,
                 controller: _titleController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   border: InputBorder.none,
                   hintText: "Title",
                   hintStyle: TextStyle(
-                      color: Colors.grey,
+                      color: Theme.of(context).colorScheme.onPrimary,
                       fontSize: 25,
                       fontWeight: FontWeight.w400),
                 ),
@@ -212,6 +213,8 @@ class _AddNewNoteState extends ConsumerState<AddNewNote> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        surfaceTintColor: Theme.of(context).colorScheme.onSurfaceVariant,
+        backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
         title: const Text('Delete Note?'),
         content: const Text('Are you sure you want to delete this note?'),
         actions: [
@@ -219,7 +222,10 @@ class _AddNewNoteState extends ConsumerState<AddNewNote> {
             onPressed: () {
               Navigator.pop(context); // Close the dialog
             },
-            child: const Text('Cancel'),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
+            ),
           ),
           TextButton(
             onPressed: () {
@@ -237,7 +243,10 @@ class _AddNewNoteState extends ConsumerState<AddNewNote> {
               Navigator.pop(context); // Close the dialog
               Navigator.pop(context); // Close the AddNewNote screen
             },
-            child: const Text('Delete'),
+            child: Text(
+              'Delete',
+              style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
+            ),
           ),
         ],
       ),

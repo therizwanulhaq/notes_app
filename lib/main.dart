@@ -21,6 +21,7 @@ class MyApp extends StatelessWidget {
           secondaryContainer: const Color.fromARGB(255, 32, 32, 32),
           onPrimary: Colors.white,
           onSecondary: Colors.grey,
+          onSurfaceVariant: const Color.fromARGB(255, 61, 61, 61),
         ),
       ),
       theme: ThemeData(
@@ -30,6 +31,7 @@ class MyApp extends StatelessWidget {
           secondaryContainer: Colors.white,
           onPrimary: Colors.black,
           onSecondary: Colors.grey,
+          onSurfaceVariant: const Color.fromARGB(255, 240, 240, 240),
         ),
         useMaterial3: true,
       ),

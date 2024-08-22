@@ -9,7 +9,7 @@ import 'package:notes_app/providers/categories_provider.dart';
 import 'package:notes_app/providers/notes_provider.dart';
 import 'package:notes_app/providers/selected_category.dart';
 
-class CategoriesScreen extends ConsumerWidget {
+class CategoriesScreen extends ConsumerStatefulWidget {
   const CategoriesScreen({
     super.key,
     this.existingNote,
@@ -20,7 +20,14 @@ class CategoriesScreen extends ConsumerWidget {
   final String? selectedCategory;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CategoriesScreen> createState() => _CategoriesScreenState();
+}
+
+class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
+  @override
+  Widget build(
+    BuildContext context,
+  ) {
     final categories = ref.watch(categoriesProvider);
 
     return Scaffold(
@@ -29,16 +36,6 @@ class CategoriesScreen extends ConsumerWidget {
         backgroundColor: Theme.of(context).colorScheme.background,
         title: const Text("Folders"),
         centerTitle: true,
-        actions: [
-          IconButton(
-            onPressed: () {
-              _showNewFolderDialog(context, ref);
-            },
-            icon: const Icon(
-              Icons.add_circle_outline,
-            ),
-          ),
-        ],
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(
@@ -80,26 +77,57 @@ class CategoriesScreen extends ConsumerWidget {
                   title: Text(
                     category.category,
                     style: TextStyle(
+                        fontWeight: _isSelected(category.category)
+                            ? FontWeight.w500
+                            : FontWeight.w400,
+                        color: _isSelected(category.category)
+                            ? Theme.of(context).colorScheme.onPrimary
+                            : Theme.of(context)
+                                .colorScheme
+                                .onPrimary
+                                .withAlpha(175)),
+                  ),
+                  trailing: Text(
+                    '${_getNoteCount(category.category, ref)}',
+                    style: TextStyle(
                       fontWeight: _isSelected(category.category)
-                          ? FontWeight.w500
-                          : FontWeight.normal,
+                          ? FontWeight.w600
+                          : FontWeight.w400,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onPrimary
+                          .withAlpha(175),
                     ),
                   ),
-                  trailing: Text('${_getNoteCount(category.category, ref)}'),
                   onTap: () => _moveNoteToCategory(ref, context, category),
                 ),
               ),
             ),
             const SizedBox(height: 8),
           ],
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            onPressed: () {
+              _showNewFolderDialog(context, ref);
+            },
+            icon: const Icon(Icons.add_outlined),
+            label: const Text("Add Folder"),
+          ),
         ],
       ),
     );
   }
 
   bool _isSelected(String categoryName) {
-    return selectedCategory == categoryName ||
-        existingNote?.category == categoryName;
+    return widget.selectedCategory == categoryName ||
+        widget.existingNote?.category == categoryName;
   }
 
   int _getNoteCount(String categoryName, WidgetRef ref) {
@@ -113,12 +141,12 @@ class CategoriesScreen extends ConsumerWidget {
 
   void _moveNoteToCategory(
       WidgetRef ref, BuildContext context, Category category) {
-    if (existingNote?.id != null) {
+    if (widget.existingNote?.id != null) {
       // Update the note with the selected category
       final notesNotifier = ref.read(notesProvider.notifier);
       final note = ref
           .read(notesProvider)
-          .firstWhere((note) => note.id == existingNote?.id);
+          .firstWhere((note) => note.id == widget.existingNote?.id);
       note.setCategory(category.category);
       notesNotifier.updateNote(note);
 
@@ -127,7 +155,9 @@ class CategoriesScreen extends ConsumerWidget {
       Navigator.pop(context);
     } else {
       ref.read(selectedCategoryProvider.notifier).selectCategory(
-          selectedCategory == category.category ? 'All' : category.category);
+          widget.selectedCategory == category.category
+              ? 'All'
+              : category.category);
       Navigator.pop(context);
     }
   }
@@ -144,6 +174,8 @@ class CategoriesScreen extends ConsumerWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+          surfaceTintColor: Theme.of(context).colorScheme.onSecondary,
           title: const Text(
             'New folder',
           ),
@@ -154,8 +186,21 @@ class CategoriesScreen extends ConsumerWidget {
               focusNode: focusNode,
               decoration: InputDecoration(
                 hintText: 'Folder Name',
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Theme.of(context).colorScheme.onSecondary,
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Theme.of(context).colorScheme.onSecondary,
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
             ),
           ),
@@ -170,7 +215,9 @@ class CategoriesScreen extends ConsumerWidget {
               child: const Text('OK'),
               onPressed: () {
                 String folderName = folderNameController.text.trim();
-                if (folderName.isNotEmpty) {
+                if (folderName.isEmpty) {
+                  Navigator.of(context).pop();
+                } else {
                   final newCategory = Category(category: folderName);
                   ref
                       .read(categoriesProvider.notifier)

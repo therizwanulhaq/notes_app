@@ -64,8 +64,9 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
             padding: const EdgeInsets.only(right: 5),
             child: IconButton(
               onPressed: () {},
-              icon: const Icon(
+              icon: Icon(
                 Icons.settings_outlined,
+                color: Theme.of(context).colorScheme.onPrimary,
               ),
             ),
           ),
