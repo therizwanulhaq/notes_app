@@ -238,6 +238,8 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+        surfaceTintColor: Theme.of(context).colorScheme.onSecondary,
         title: const Text("Delete folder?"),
         content: const Text('Are you sure you want to delete this folder?'),
         actions: [

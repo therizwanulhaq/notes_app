@@ -23,10 +23,12 @@ class _AddNewNoteState extends ConsumerState<AddNewNote> {
   int _charCount = 0;
   late DateTime _date;
   bool _isSaved = false;
+  Note? _currentNote;
 
   @override
   void initState() {
     super.initState();
+    _currentNote = widget.existingNote;
     _titleController = TextEditingController(
       text: widget.existingNote?.title ?? '',
     );
@@ -45,28 +47,32 @@ class _AddNewNoteState extends ConsumerState<AddNewNote> {
   }
 
   void _saveNote() {
+    if (_isSaved) return;
+
     FocusScope.of(context).unfocus();
     if (_titleController.text.isNotEmpty ||
         _contentController.text.isNotEmpty) {
+      final noteId = _currentNote?.id;
       final note = Note(
-        id: widget.existingNote
-            ?.id, // Use existing id if editing, otherwise it will generate a new one
+        id: noteId, // Use existing id if editing, otherwise it will generate a new one
         title: _titleController.text,
         content: _contentController.text,
         date: _date,
-        category: widget.existingNote?.category ??
+        category: _currentNote?.category ??
             'Uncategorized', // Retain existing category if editing
       );
 
-      if (widget.existingNote != null) {
+      if (_currentNote != null) {
         ref.read(notesProvider.notifier).updateNote(note);
       } else {
         ref.read(notesProvider.notifier).addNote(note);
       }
+
+      setState(() {
+        _isSaved = true;
+        _currentNote = note;
+      });
     }
-    setState(() {
-      _isSaved = true;
-    });
   }
 
   void _handleMoreOption(String option) {
@@ -140,7 +146,7 @@ class _AddNewNoteState extends ConsumerState<AddNewNote> {
                 ),
               ),
             ),
-            if (widget.existingNote != null || _isSaved)
+            if (_currentNote != null || _isSaved)
               PopupMenuButton<String>(
                 splashRadius: 100,
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -249,6 +255,15 @@ class _AddNewNoteState extends ConsumerState<AddNewNote> {
   }
 
   void deleteNote() {
+    if (_currentNote == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No note to delete'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -268,9 +283,7 @@ class _AddNewNoteState extends ConsumerState<AddNewNote> {
           ),
           TextButton(
             onPressed: () {
-              ref
-                  .read(notesProvider.notifier)
-                  .deleteNote(widget.existingNote!.id);
+              ref.read(notesProvider.notifier).deleteNote(_currentNote!.id);
 
               // Show a SnackBar after deleting the note
               ScaffoldMessenger.of(context).showSnackBar(
