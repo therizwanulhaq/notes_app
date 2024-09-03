@@ -50,28 +50,38 @@ class _AddNewNoteState extends ConsumerState<AddNewNote> {
     if (_isSaved) return;
 
     FocusScope.of(context).unfocus();
-    if (_titleController.text.isNotEmpty ||
-        _contentController.text.isNotEmpty) {
-      final noteId = _currentNote?.id;
-      final note = Note(
-        id: noteId, // Use existing id if editing, otherwise it will generate a new one
-        title: _titleController.text,
-        content: _contentController.text,
-        date: _date,
-        category: _currentNote?.category ??
-            'Uncategorized', // Retain existing category if editing
-      );
-
-      if (_currentNote != null) {
-        ref.read(notesProvider.notifier).updateNote(note);
-      } else {
-        ref.read(notesProvider.notifier).addNote(note);
-      }
+    if (_isNoteContentValid()) {
+      final note = _createNote();
+      _saveOrUpdateNoteInProvider(note);
 
       setState(() {
         _isSaved = true;
         _currentNote = note;
       });
+    }
+  }
+
+  bool _isNoteContentValid() {
+    return _titleController.text.isNotEmpty ||
+        _contentController.text.isNotEmpty;
+  }
+
+  Note _createNote() {
+    final noteId = _currentNote?.id;
+    return Note(
+      id: noteId,
+      title: _titleController.text,
+      content: _contentController.text,
+      date: _date,
+      category: _currentNote?.category ?? 'Uncategorized',
+    );
+  }
+
+  void _saveOrUpdateNoteInProvider(Note note) {
+    if (_currentNote != null) {
+      ref.read(notesProvider.notifier).updateNote(note);
+    } else {
+      ref.read(notesProvider.notifier).addNote(note);
     }
   }
 
@@ -256,12 +266,7 @@ class _AddNewNoteState extends ConsumerState<AddNewNote> {
 
   void deleteNote() {
     if (_currentNote == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No note to delete'),
-          duration: Duration(seconds: 2),
-        ),
-      );
+      _showSnackBar('No note to delete');
       return;
     }
     showDialog(
@@ -272,35 +277,35 @@ class _AddNewNoteState extends ConsumerState<AddNewNote> {
         title: const Text('Delete Note?'),
         content: const Text('Are you sure you want to delete this note?'),
         actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context); // Close the dialog
-            },
-            child: Text(
-              'Cancel',
-              style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              ref.read(notesProvider.notifier).deleteNote(_currentNote!.id);
-
-              // Show a SnackBar after deleting the note
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Note deleted'),
-                  duration: Duration(seconds: 2),
-                ),
-              );
-              Navigator.pop(context); // Close the dialog
-              Navigator.pop(context); // Close the AddNewNote screen
-            },
-            child: Text(
-              'Delete',
-              style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
-            ),
-          ),
+          _buildDialogButton('Cancel', () => Navigator.pop(context)),
+          _buildDialogButton('Delete', _deleteNoteAndClose),
         ],
+      ),
+    );
+  }
+
+  void _deleteNoteAndClose() {
+    ref.read(notesProvider.notifier).deleteNote(_currentNote!.id);
+    _showSnackBar('Note deleted');
+    Navigator.pop(context); // Close the dialog
+    Navigator.pop(context); // Close the AddNewNote screen
+  }
+
+  TextButton _buildDialogButton(String text, VoidCallback onPressed) {
+    return TextButton(
+      onPressed: onPressed,
+      child: Text(
+        text,
+        style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
+      ),
+    );
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 2),
       ),
     );
   }
